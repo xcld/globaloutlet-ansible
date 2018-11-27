@@ -19,12 +19,12 @@
         become_method: sudo
         apt_repository: repo='ppa:ondrej/php' update_cache=yes
       - name: 添加zabbix4.0源
-          become: yes
-          become_method: sudo
-          get_url:
-             url: "https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-2+bionic_all.deb"
-             dest: /tmp/zabbix-release_4.0-2+bionic_all.deb
-             mode: 0755
+        become: yes
+        become_method: sudo
+        get_url:
+            url: "https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-2+bionic_all.deb"
+            dest: /tmp/zabbix-release_4.0-2+bionic_all.deb
+            mode: 0755
       - name: install zabbix-release
         become: yes
         become_method: sudo
