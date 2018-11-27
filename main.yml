@@ -103,8 +103,8 @@
         shell: >
            mv /etc/php/7.2/fpm /etc/php/7.2/fpm.bak
       - name: backup oldphp5.6config
-          become: yes
-          become_method: sudo
+        become: yes
+        become_method: sudo
           shell: >
             mv /etc/php/5.6/fpm /etc/php/5.6/fpm.bak
       - name: Extract nginxconfig into dir
@@ -122,9 +122,9 @@
            dest: "/etc/php/7.2"
            remote_src: yes
       - name: Extract php5.6config into dir
-          become: yes
-          become_method: sudo
-          unarchive:
+        become: yes
+        become_method: sudo
+        unarchive:
             src: "https://www.taoanz.org/aa/fpm5.6.tar.gz"
             dest: "/etc/php/5.6"
             remote_src: yes
