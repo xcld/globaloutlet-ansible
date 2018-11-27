@@ -1,0 +1,156 @@
+---
+- hosts: zabbix
+  pre_tasks:
+      - name: update apt cache if needed.
+        become: yes
+        become_method: sudo
+        apt: update_cache=yes cache_valid_time=3600
+  tasks:
+      - name: 安装用于管理apt源工具
+        become: yes
+        become_method: sudo
+        apt: name={{item}} state=present
+        with_items:
+            - python-apt
+            - python-pycurl
+            - python-mysqldb
+      - name: 添加php的ondrej源
+        become: yes
+        become_method: sudo
+        apt_repository: repo='ppa:ondrej/php' update_cache=yes
+      - name: 添加zabbix4.0源
+          become: yes
+          become_method: sudo
+          get_url:
+             url: "https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-2+bionic_all.deb"
+             dest: /tmp/zabbix-release_4.0-2+bionic_all.deb
+             mode: 0755
+      - name: install zabbix-release
+        become: yes
+        become_method: sudo
+        shell: >
+              dpkg -i /tmp/zabbix-release_4.0-2+bionic_all.deb
+      - name: 安装 nginx,mysql,php 以及拓展依赖
+        become: yes
+        become_method: sudo
+        apt: name={{ item }} state=present
+        with_items:
+             -  git
+             -  curl
+             -  nginx
+             -  php5.6
+             -  php5.6-bcmath
+             -  php5.6-cli
+             -  php5.6-common
+             -  php5.6-curl
+             -  php5.6-dev
+             -  php5.6-fpm
+             -  php5.6-gd
+             -  php5.6-imap
+             -  php5.6-intl
+             -  php5.6-json
+             -  php5.6-mbstring
+             -  php5.6-mcrypt
+             -  php5.6-mysql
+             -  php5.6-opcache
+             -  php5.6-pspell
+             -  php5.6-readline
+             -  php5.6-recode
+             -  php5.6-snmp
+             -  php5.6-soap
+             -  php5.6-sqlite3
+             -  php5.6-tidy
+             -  php5.6-xml
+             -  php5.6-xmlrpc
+             -  php5.6-xsl
+             -  php5.6-zip
+             -  php7.2
+             -  php7.2-cli
+             -  php7.2-common
+             -  php7.2-curl
+             -  php7.2-fpm
+             -  php7.2-gd
+             -  php7.2-json
+             -  php7.2-mbstring
+             -  php7.2-mysql
+             -  php7.2-opcache
+             -  php7.2-readline
+             -  php7.2-xml
+             -  php7.2-xmlrpc
+             -  php7.2-zip
+             -  openssl
+             -  mysql-server
+             -  mysql-client
+             -  libcurl4-openssl-dev
+             -  sendmail
+             -  sendmail-cf
+             -  zabbix-server-mysql
+             -  zabbix-frontend-php
+             -  zabbix-agent
+             -  zabbix-get
+      - name: "stop ufw"
+        become: yes
+        become_method: sudo
+        service: name=ufw state=stopped
+      - name: backup oldnginxconfig
+        become: yes
+        become_method: sudo
+        shell: >
+           mv /etc/nginx /etc/nginx.bak
+      - name: backup oldphp7.2config
+        become: yes
+        become_method: sudo
+        shell: >
+           mv /etc/php/7.2/fpm /etc/php/7.2/fpm.bak
+      - name: backup oldphp5.6config
+          become: yes
+          become_method: sudo
+          shell: >
+            mv /etc/php/5.6/fpm /etc/php/5.6/fpm.bak
+      - name: Extract nginxconfig into dir
+        become: yes
+        become_method: sudo
+        unarchive:
+           src: "https://www.taoanz.org/aa/nginx.tar.gz"
+           dest: "/etc/"
+           remote_src: yes
+      - name: Extract php7.2config into dir
+        become: yes
+        become_method: sudo
+        unarchive:
+           src: "https://www.taoanz.org/aa/fpm7.2.tar.gz"
+           dest: "/etc/php/7.2"
+           remote_src: yes
+      - name: Extract php5.6config into dir
+          become: yes
+          become_method: sudo
+          unarchive:
+            src: "https://www.taoanz.org/aa/fpm5.6.tar.gz"
+            dest: "/etc/php/5.6"
+            remote_src: yes
+      - name: Extract sslconfig into dir
+        become: yes
+        become_method: sudo
+        unarchive:
+           src: "https://www.taoanz.org/aa/ssl.tar.gz"
+           dest: "/etc/ssl"
+           remote_src: yes
+      - name: Extract appsrc into dir
+        become: yes
+        become_method: sudo
+        unarchive:
+           src: "https://www.taoanz.org/aa/crazysaloldzabbix.tar.gz"
+           dest: "/home/"
+           group: crazysal
+           owner: crazysal
+           remote_src: yes
+      - name: start memcache,nginx,php
+        become: yes
+        become_method: sudo
+        service: "name={{ item }} state=started enabled=yes"
+        with_items:
+             - nginx
+             - php7.2-fpm
+             - php5.6-fpm
+             - mysql
+
